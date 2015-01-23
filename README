@@ -10,7 +10,7 @@ This project is for GopherGala 2014 and also ShopKeep Code Smash. We will be bui
 Getting Started
 
 - Install Go
-- Install gobot.io
+- Install Gobot.io
     - `go get -d -u github.com/hybridgroup/gobot/... && go install github.com/hybridgroup/gobot/platforms/raspi`
 - Setup cross compiler for Raspberry Pi
     - `cd /usr/local/bin/go/src`
@@ -20,5 +20,6 @@ Getting Started
 - Upload binary to Raspberry Pi
     - `scp goncierge pi@192.168.1.xxx:/home/pi/` 
 - Execute binary on Raspberry Pi
+    - `ssh pi@192.168.1.xxx`
     - `./goncierge`
 - Profit :)

@@ -1,0 +1,24 @@
+Goncierge - A Meeting Room Robot
+
+This project is for GopherGala 2014 and also ShopKeep Code Smash. We will be building a meeting room robot that will be able to detect when people are in the room and notify an external service that the meeting is active.
+
+- Raspberry Pi
+- Motion Sensor
+- Magnetic Door Sensor
+- Gobot.io
+
+Getting Started
+
+- Install Go
+- Install gobot.io
+    - `go get -d -u github.com/hybridgroup/gobot/... && go install github.com/hybridgroup/gobot/platforms/raspi`
+- Setup cross compiler for Raspberry Pi
+    - `cd /usr/local/bin/go/src`
+    - `sudo GOOS=linux GOARCH=arm ./make.bash --no-clean`
+- Compile Goncierge 
+    - `GOARM=6 GOARCH=arm GOOS=linux go build goncierge.go`
+- Upload binary to Raspberry Pi
+    - `scp goncierge pi@192.168.1.xxx:/home/pi/` 
+- Execute binary on Raspberry Pi
+    - `./goncierge`
+- Profit :)

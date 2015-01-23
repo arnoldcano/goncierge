@@ -15,11 +15,14 @@ func main() {
 	//Use at your own risk! This is untested on pi
 	r := raspi.NewRaspiAdaptor("raspi")
 	pin := gpio.NewDirectPinDriver(r, "pin", "13")
+
 	work := func() {
 		gobot.Every(1*time.Second, func() {
-			if v, err := pin.DigitalRead(); err != nil {
-				fmt.Printf("Signal Detected: %v\n", v)
+			v, err := pin.DigitalRead()
+			if err != nil {
+				fmt.Printf("Digital Read Error: %s", err.Error())
 			}
+			fmt.Printf("Motion Detected: %v\n", v)
 		})
 	}
 

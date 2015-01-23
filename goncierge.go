@@ -15,6 +15,7 @@ func main() {
 	//Use at your own risk! This is untested on pi
 	r := raspi.NewRaspiAdaptor("raspi")
 	pin := gpio.NewDirectPinDriver(r, "pin", "13")
+	led := gpio.NewLedDriver(r, "led", "7")
 
 	work := func() {
 		gobot.Every(1*time.Second, func() {
@@ -22,13 +23,18 @@ func main() {
 			if err != nil {
 				fmt.Printf("Digital Read Error: %s", err.Error())
 			}
-			fmt.Printf("Motion Detected: %v\n", v)
+			if v == 1 {
+				fmt.Printf("Motion Detected: %v\n", v)
+				led.On()
+			} else {
+				led.Off()
+			}
 		})
 	}
 
-	robot := gobot.NewRobot("pinBot",
+	robot := gobot.NewRobot("Goncierge",
 		[]gobot.Connection{r},
-		[]gobot.Device{pin},
+		[]gobot.Device{pin, led},
 		work,
 	)
 

@@ -23,23 +23,27 @@ func main() {
 	gbot := gobot.NewGobot()
 
 	r := raspi.NewRaspiAdaptor("raspi")
-	led := gpio.NewLedDriver(r, "led", "7")
+	statusLed := gpio.NewLedDriver(r, "statusLed", "11")
+	eventLed := gpio.NewLedDriver(r, "eventLed", "7")
 	button := gpio.NewButtonDriver(r, "button", "13")
 
 	work := func() {
+		gobot.Every(1*time.Second, func() {
+			statusLed.Toggle()
+		})
 		gobot.On(button.Event("push"), func(data interface{}) {
-			led.On()
+			eventLed.On()
 			go toggleDoorState("closed")
 		})
 		gobot.On(button.Event("release"), func(data interface{}) {
-			led.Off()
+			eventLed.Off()
 			go toggleDoorState("open")
 		})
 	}
 
 	robot := gobot.NewRobot("Goncierge",
 		[]gobot.Connection{r},
-		[]gobot.Device{button, led},
+		[]gobot.Device{button, statusLed, eventLed},
 		work,
 	)
 

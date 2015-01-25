@@ -1,57 +1,44 @@
 package main
 
 import (
+	"flag"
 	"fmt"
-	//"time"
+	"net/http"
+	"net/url"
+	"time"
 
 	"github.com/hybridgroup/gobot"
-	"github.com/hybridgroup/gobot/api"
 	"github.com/hybridgroup/gobot/platforms/gpio"
 	"github.com/hybridgroup/gobot/platforms/raspi"
 )
 
+var (
+	host      *string = flag.String("host", "http://192.168.50.145:3000/door_events", "goncierge host")
+	room_slug *string = flag.String("room_slug", "foo", "goncierge room slug")
+)
+
 func main() {
+	flag.Parse()
+
 	gbot := gobot.NewGobot()
 
-	api.NewAPI(gbot).Start()
-
 	r := raspi.NewRaspiAdaptor("raspi")
-	//pin := gpio.NewDirectPinDriver(r, "pin", "13")
 	led := gpio.NewLedDriver(r, "led", "7")
 	button := gpio.NewButtonDriver(r, "button", "13")
 
 	work := func() {
 		gobot.On(button.Event("push"), func(data interface{}) {
-			fmt.Println("Button Pushed")
 			led.On()
+			go toggleDoorState("closed")
 		})
 		gobot.On(button.Event("release"), func(data interface{}) {
-			fmt.Println("Button Released")
 			led.Off()
+			go toggleDoorState("open")
 		})
 	}
 
-	/*
-		work := func() {
-			gobot.Every(500*time.Millisecond, func() {
-				v, err := pin.DigitalRead()
-				if err != nil {
-					fmt.Printf("Digital Read Error: %s\n", err.Error())
-				}
-				if v == 1 {
-					fmt.Println("Motion Detected")
-					led.On()
-				} else {
-					fmt.Println("No Motion Detected")
-					led.Off()
-				}
-			})
-		}
-	*/
-
 	robot := gobot.NewRobot("Goncierge",
 		[]gobot.Connection{r},
-		//[]gobot.Device{pin, led},
 		[]gobot.Device{button, led},
 		work,
 	)
@@ -59,4 +46,19 @@ func main() {
 	gbot.AddRobot(robot)
 
 	gbot.Start()
+}
+
+func toggleDoorState(state string) {
+	now := time.Now().Format(time.RFC3339)
+	_, err := http.PostForm(
+		*host,
+		url.Values{
+			"room_slug":  {*room_slug},
+			"timestamp":  {now},
+			"door_state": {state},
+		},
+	)
+	if err != nil {
+		fmt.Printf("[%s] Host Error: %s\n", now, err.Error())
+	}
 }
